@@ -41,8 +41,7 @@
   int motor_turn_off_delay=0;
   int blink_on=FALSE;
 
-  #define _BLINK_DELAY=10;
-  #define _MTR_OFF_DELAY=10;
+  #define _MTR_OFF_DELAY 10;
   
 void setup() {
   // put your setup code here, to run once:
