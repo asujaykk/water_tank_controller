@@ -25,8 +25,7 @@
   #define TRUE 1
   #define FALSE 0
 
-/*SENSOR THRESHOL VALUE*/
-  #define S_THRESHOLD 800
+
 
 
 /*GLOBAL VARIABLES*/
@@ -41,8 +40,13 @@
   int motor_turn_off_delay=0;
   int blink_on=FALSE;
 
-  #define _MTR_OFF_DELAY 10;
-  
+
+/*SENSOR THRESHOLD VALUE*/
+  int S_THRESHOLD=800;
+  int _MTR_OFF_DELAY=10;
+
+
+
 void setup() {
   // put your setup code here, to run once:
 
@@ -57,23 +61,40 @@ void setup() {
     digitalWrite(i,LOW);
     delay(1000);
   }
-  //Serial.println("start");
-
+  /*Read the following parameter from EEPROM and update
+  * This will help to restore the state if there was a power failure
+  * S_THRESHOLD
+  * manual_on
+  * _MTR_OFF_DELAY
+  */
+  
+  
+  readParametersFromMemory();
 }
 
 void loop() {
 
   // put your main code here, to run repeatedly:
    sens_read();
+
+   //command read
+   command_read();
+   
    //Serial.println("update_level");
    update_level();
+   
    //Serial.println("indicator");
-
    update_indicator();
    
 
    //Serial.println("m_control");
    update_motor_control();
+
+   //update memory
+   writeParametersToMemory();
+   
+   //activate/deactivate motor
+   drive_motor();
 
    //Serial.println("send_data");
    send_data();
@@ -81,14 +102,7 @@ void loop() {
    delay(1000);
 }
 
-void sens_read(){
-  level_1=analogRead(S_LOW);
-  level_2=analogRead(S_MED);
-  level_3=analogRead(S_FUL);
-  manual_on=digitalRead(MANUAL_SWITCH);
-  
 
-}
 
 void update_level(){
   if(level_3>S_THRESHOLD && level_2>S_THRESHOLD && level_1>S_THRESHOLD ){
@@ -118,56 +132,13 @@ void update_level(){
     }
   }
 }
-void  update_indicator(){
-  if (sensor_error==TRUE){
-      //update_motor_control();
-      if(blink_on==TRUE){
-        digitalWrite(LED_FUL,HIGH);
-        digitalWrite(LED_MED,HIGH);
-        digitalWrite(LED_LOW,HIGH);
-        digitalWrite(LED_EMPTY,HIGH);
-      }
-      else{
-        digitalWrite(LED_FUL,LOW);
-        digitalWrite(LED_MED,LOW);
-        digitalWrite(LED_LOW,LOW);
-        digitalWrite(LED_EMPTY,LOW);
-      }
-  } 
-  else if (level==_FUL){
-      digitalWrite(LED_FUL,HIGH);
-      digitalWrite(LED_MED,HIGH);
-      digitalWrite(LED_LOW,HIGH);
-      digitalWrite(LED_EMPTY,HIGH);
-  } 
-  else if (level==_MED){
-      digitalWrite(LED_FUL,LOW);
-      digitalWrite(LED_MED,HIGH);
-      digitalWrite(LED_LOW,HIGH);
-      digitalWrite(LED_EMPTY,HIGH);
-  }
-  else if (level==_LOW){
-      digitalWrite(LED_FUL,LOW);
-      digitalWrite(LED_MED,LOW);
-      digitalWrite(LED_LOW,HIGH);
-      digitalWrite(LED_EMPTY,HIGH);
-  }
-    else if (level==_EMPTY){
-      digitalWrite(LED_FUL,LOW);
-      digitalWrite(LED_MED,LOW);
-      digitalWrite(LED_LOW,LOW);
-      digitalWrite(LED_EMPTY,HIGH);
-  }
-  
-}
+
 void update_motor_control(){
    if(sensor_error==FALSE && (level==_EMPTY || (manual_on==TRUE && level != _FUL) ) ){
-     motor_on=TRUE;
-     digitalWrite(MOTOR_PIN,HIGH);
+     motor_on=TRUE;   
      
-   } else if(sensor_error==TRUE ) {
+   } else if(sensor_error==TRUE || manual_on==FALSE) {
       motor_on=FALSE;
-      digitalWrite(MOTOR_PIN,LOW);
    
    } else if(level==_FUL) {
 
@@ -176,33 +147,9 @@ void update_motor_control(){
       }
       else if(motor_turn_off_delay==1){
          motor_on=FALSE;
-         digitalWrite(MOTOR_PIN,LOW);
       }
       else{
         motor_turn_off_delay--;
       }
    }
-}
-
-
-
-void send_data(){
-  Serial.print('$');
-  Serial.print(level_1);
-  Serial.print('*');
-  Serial.print(level_2);
-  Serial.print('*');
-  Serial.print(level_3);
-  Serial.print('*');
-  Serial.print(level);
-  Serial.print('*');
-  Serial.print(motor_on);
-  Serial.print('*');
-  Serial.print(manual_on);
-  Serial.print('*');
-  Serial.print(sensor_error);
-  Serial.print('*');
-  Serial.print(S_THRESHOLD);
-  Serial.println('#');
-  
 }
