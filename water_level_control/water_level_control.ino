@@ -93,13 +93,21 @@ void sens_read(){
 void update_level(){
   if(level_3>S_THRESHOLD && level_2>S_THRESHOLD && level_1>S_THRESHOLD ){
     level=_FUL;
-  } else if (level_3<S_THRESHOLD && level_2>S_THRESHOLD && level_1>S_THRESHOLD ){
+    sensor_error=FALSE;
+  } 
+  else if (level_3<S_THRESHOLD && level_2>S_THRESHOLD && level_1>S_THRESHOLD ){
     level=_MED;
-  }else if (level_3<S_THRESHOLD && level_2<S_THRESHOLD && level_1>S_THRESHOLD ) {
+     sensor_error=FALSE;
+  }
+  else if (level_3<S_THRESHOLD && level_2<S_THRESHOLD && level_1>S_THRESHOLD ) {
     level=_LOW;
-  }else if (level_3<S_THRESHOLD && level_2<S_THRESHOLD && level_1<S_THRESHOLD ) {
+     sensor_error=FALSE;
+  }
+  else if (level_3<S_THRESHOLD && level_2<S_THRESHOLD && level_1<S_THRESHOLD ) {
     level=_EMPTY;
-  } else{
+     sensor_error=FALSE;
+  }
+  else{
     level=_SERROR;
     sensor_error=TRUE;
     if (blink_on){
