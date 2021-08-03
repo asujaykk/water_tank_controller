@@ -31,6 +31,7 @@ void command_read(){
     }
     else if(value=='0'){
       manual_on=FALSE;
+      motor_on=FALSE;
       Serial.println("MOFF");
     }
   } 

@@ -5,6 +5,7 @@ void sens_read(){
   if(digitalRead(MANUAL_SWITCH)){
     if(manual_on==TRUE){
        manual_on=FALSE;
+       motor_on=FALSE;
     }
     else{
       manual_on=TRUE;
